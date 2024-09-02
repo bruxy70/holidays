@@ -18,6 +18,7 @@ from homeassistant.helpers.typing import ConfigType
 from . import const
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
+PLATFORMS = [const.CALENDAR_PLATFORM]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,11 +38,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     )
     config_entry.add_update_listener(update_listener)
     # Add calendar
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(
-            config_entry, const.CALENDAR_PLATFORM
-        )
-    )
+    await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
     return True
 
 
@@ -108,9 +105,7 @@ async def async_migrate_entry(_, config_entry: ConfigEntry) -> bool:
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Update listener - to re-create device after options update."""
     await hass.config_entries.async_forward_entry_unload(entry, const.CALENDAR_PLATFORM)
-    hass.async_add_job(
-        hass.config_entries.async_forward_entry_setup(entry, const.CALENDAR_PLATFORM)
-    )
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
 
 def create_holidays(
